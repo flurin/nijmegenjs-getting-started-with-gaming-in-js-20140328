@@ -1,0 +1,23 @@
+require 'sass/plugin/rack'
+
+Sass::Plugin.options[:style] = :expanded
+Sass::Plugin.options[:template_location] = {
+  "./html/stylesheets" => "./html/stylesheets",
+  "./html/vendor/revealjs/css/theme/template" => "./html/vendor/revealjs/css/theme/template",  
+}
+
+mockup.serve do |s|
+  s.port = 9000
+  s.use Sass::Plugin::Rack
+end
+
+mockup.release do |r|
+  r.use(:sass, :skip => [/\/_.*\.scss\Z/])
+
+  r.cleanup "**/.DS_Store"
+  r.cleanup "**/.sass-cache"
+  r.cleanup "**/stylesheets/src"  
+  
+  # r.finalize GitBranch, :branch => "gh-pages", :remote => "git@github.com:flurin/thalia-lunchlezing-20140226.git"
+end
+
