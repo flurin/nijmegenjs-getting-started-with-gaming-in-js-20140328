@@ -35,6 +35,7 @@
             this.game.load.spritesheet('floor', 'assets/fancy/floor.png', 500, 20);
             this.game.load.spritesheet('obstacle', 'assets/simple/obstacle.png', 100, 100);
             this.game.load.spritesheet('dirt', 'assets/fancy/dirt.png', 7, 6);            
+            this.game.load.spritesheet('blood', 'assets/fancy/blood.png', 7, 6);            
 
             this.game.load.audio("jump", ["assets/jump.mp3", "assets/jump.ogg"]);
             this.game.load.audio("death", ["assets/death.mp3", "assets/death.ogg"]);   
@@ -92,7 +93,16 @@
             // Dirt
             this.dirtParticles = this.game.add.emitter(0,0,100);
             this.dirtParticles.makeParticles('dirt');
-            this.dirtParticles.gravity = 200;            
+            this.dirtParticles.gravity = 200;         
+
+            // Blood
+            this.bloodParticles = this.game.add.emitter(0,0,100);
+            this.bloodParticles.makeParticles('blood');
+            this.bloodParticles.gravity = 200;
+            this.bloodParticles.minParticleScale = 0.1;
+            this.bloodParticles.maxParticleScale = 2;
+            this.bloodParticles.width = this.player.width;
+            this.bloodParticles.height = this.player.height;
 
             // Timer!
             this.obstacleTimer = this.game.time.create(false);
@@ -183,9 +193,16 @@
           },
 
           collideWithObstacle : function(player, obstacle){
-            this.player.kill();
-            this.sounds.death.play();
-            this.gameOver();
+            this.sounds.death.play();            
+
+            this.bloodParticles.x = this.player.body.x + this.player.body.halfWidth;
+            this.bloodParticles.y = this.player.body.y + this.player.body.halfHeight;
+            this.bloodParticles.start(true, 1000, null, 50);
+
+            var killTween = this.game.add.tween(this.player).to({ alpha: 0 }, 300, Phaser.Easing.Bounce.InOut, true);
+            killTween.onComplete.add(function(){
+              this.player.kill();
+            }, this);
           },
 
           jump : function(){
