@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>4-op-1-rij</title>
+    <title>Jump!</title>
 
     <script src="vendor/phaser.js"></script>
   </head>
@@ -16,7 +16,6 @@
         var GamePlay = function(){
           this.started = false;
           this.startedObstacles = false;
-          this.score = 0;
 
           this.maxObstacleSize = {
             x: 60,
@@ -32,13 +31,18 @@
         GamePlay.prototype = {
 
           preload : function(){
-            this.game.stage.backgroundColor = '#ff0';
-            this.game.load.spritesheet('coins', 'assets/coins.png', 35, 35);
+            this.game.load.spritesheet('player', 'assets/player.png', 35, 35);
             this.game.load.spritesheet('floor', 'assets/floor.png', 500, 20);
-            this.game.load.spritesheet('obstacle', 'assets/floor.png', 500, 20);            
+            this.game.load.spritesheet('obstacle', 'assets/floor.png', 500, 20);  
+
+            this.game.load.audio("jump", ["assets/jump.mp3", "assets/jump.ogg"]);
+            this.game.load.audio("death", ["assets/death.mp3", "assets/death.ogg"]);
           },
 
           create : function(){
+            this.game.score = 0;
+            this.game.stage.backgroundColor = '#ff0';
+
             // Set up physics
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
             this.game.physics.arcade.gravity.y = 500;            
@@ -53,12 +57,13 @@
             this.floor.body.immovable = true;
 
             // Init player
-            this.player = this.game.add.sprite(this.game.world.width/3,this.game.world.centerY, 'coins', 1);
+            this.player = this.game.add.sprite(this.game.world.width/3,this.game.world.centerY, 'player');
+            this.player.anchor.setTo(0.5,0.5);
 
             // Setup scoretext
-            var style = { font: "16px Arial", fill: "#000", align: "left" };
-            this.scoreText = this.game.add.text(10, 10, "Score: " + this.score, style);
+            this.scoreText = this.game.add.text(10, 10, "", { font: "16px Arial", fill: "#000", align: "left" });
             this.scoreText.anchor.setTo(0,0);
+            this.updateScoreText();
 
 
             // Physics
@@ -76,7 +81,15 @@
 
             // Keyboard
             var space_key = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-            space_key.onDown.add(this.jump, this);              
+            space_key.onDown.add(this.jump, this);    
+
+            // Sounds
+            this.sounds = {};
+            this.sounds.jump = this.game.add.audio("jump");          
+            this.sounds.jump.volume = 0.3;
+
+            this.sounds.death = this.game.add.audio("death");          
+            this.sounds.death.volume = 0.3;
 
           },
 
@@ -103,6 +116,11 @@
             this.started = true;
           },
 
+          gameOver : function(){
+            this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
+            this.game.state.start("Over");
+          },          
+
           startObstacles : function(){
             if(this.player.alive){
               this.addObstacle();
@@ -111,13 +129,13 @@
             }
           },
 
-          updateScore : function(){
-            this.score += 1;
-            this.scoreText.text = "Score: " + this.score;
+          updateScoreText : function(){
+            this.scoreText.text = "Score: " + this.game.score;
           },
 
           addObstacle : function(){
-            this.updateScore();
+            this.game.score += 1;
+            this.updateScoreText();
 
             var obstacle = this.obstacles.getFirstDead();
 
@@ -143,22 +161,61 @@
           },
 
           collideWithObstacle : function(player, obstacle){
-            console.log("BANG!");
-            this.player.kill();
+            // this.player.kill();
+            // this.sounds.death.play();
+            // this.gameOver();
           },
 
           jump : function(){
-            console.log("boink!");
             if(this.player.body.touching.down === true){
+              this.sounds.jump.play();
               this.player.body.velocity.y = -250;  
-            }
-            
+
+              this.game.add.tween(this.player).to({angle: this.player.angle + 180}, 1000, Phaser.Easing.Linear.In, true, 0, 0, false);
+            }            
           }
 
         }
 
+        var GameOver = function(){ };
+
+        GameOver.prototype = {
+          create : function(){
+            this.game.stage.backgroundColor = '#ff0';
+
+            this.bodyText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, "GAME OVER!\n\nYour score was:\n" + this.game.score, { font: "40px Arial", fill: "#000", align: "center" });
+            this.bodyText.anchor.setTo(0.5,0.5);
+
+          }
+        }
+
+        var GameStart = function(){ };
+
+        GameStart.prototype = {
+          create : function(){
+            this.game.stage.backgroundColor = '#ff0';
+
+            this.bodyText = this.game.add.text(this.game.world.centerX, this.game.world.centerY, "JUMP!\n\n Don't let the blocks hit you!\nJump over them by\npressing the spacebar.", { font: "40px Arial", fill: "#000", align: "center" });
+            this.bodyText.anchor.setTo(0.5,0.5);
+
+            this.subText = this.game.add.text(this.game.world.centerX, this.game.world.height - 10, "Press SPACE to begin", { font: "18px Arial", fill: "#000", align: "center" })
+            this.subText.anchor.setTo(0.5, 1);
+
+
+            var space_key = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+            space_key.onDown.add(this.start, this);
+          },
+
+          start : function(){
+            this.game.input.keyboard.removeKey(Phaser.Keyboard.SPACEBAR);
+            this.game.state.start("Play");
+          }
+        }
+
         var instance = new Phaser.Game(w, h, Phaser.AUTO, 'game');
+        instance.state.add('Start', GameStart);
         instance.state.add('Play', GamePlay);
+        instance.state.add('Over', GameOver);        
         instance.state.start('Play');
 
 
