@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jump! - Demo 3</title>
+
+    <script src="vendor/phaser.js"></script>
+  </head>
+  <body>
+    <h1>2. Let's get physical!</h1>
+
+    <div id="game"></div>
+
+    <script>
+      !function(){
+        'use strict';
+        var GamePlay = function(){
+
+        };
+
+        GamePlay.prototype = {
+
+          preload : function(){
+            this.game.load.spritesheet('player', 'assets/simple/player.png', 35, 35);
+            this.game.load.spritesheet('floor', 'assets/simple/floor.png', 500, 20);
+          },
+
+          create : function(){
+            this.game.stage.backgroundColor = '#ff0';
+
+            // Set up physics
+            // this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            // this.game.physics.arcade.gravity.y = 500;
+
+            // Floor
+            this.floor = this.game.add.sprite(0, this.game.world.height, 'floor');
+            // this.floor.anchor.setTo(0,1);
+            // this.game.physics.enable( [ this.floor ], Phaser.Physics.ARCADE);
+            // this.floor.body.allowGravity = false;            
+            // this.floor.body.immovable = true;            
+
+            // Player
+            this.player = this.game.add.sprite(0, 0, 'player');
+            // this.game.physics.enable( [ this.player ], Phaser.Physics.ARCADE);
+            // this.player.body.collideWorldBounds = true;           
+
+          },
+
+          update : function(){
+            this.game.physics.arcade.collide(this.player, this.floor);
+          }
+        };
+
+
+        var instance = new Phaser.Game(500, 500, Phaser.AUTO, 'game');
+        instance.state.add('Play', GamePlay);
+        instance.state.start('Play');
+
+      }();
+    </script>
+
+  </body>
+</html>
