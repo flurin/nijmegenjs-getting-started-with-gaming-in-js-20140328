@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jump! - Demo 1</title>
+
+    <script src="vendor/phaser.js"></script>
+  </head>
+  <body>
+    <h1>1. The most basic game</h1>
+
+    <div id="game"></div>
+
+    <script>
+      !function(){
+        'use strict';
+
+        var preload = function(){
+        };
+
+        var create = function(){
+          // this.game.stage.backgroundColor = '#ff0';
+        };
+
+        var update = function(){
+        };
+
+        var render = function(){
+        }
+
+        new Phaser.Game(500, 500, Phaser.AUTO, 'game', {
+          preload: preload,
+          create: create,
+          update: update,
+          render: render
+        });
+
+
+
+      }();      
+    </script>
+
+  </body>
+</html>

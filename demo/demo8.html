@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jump! - Demo 8</title>
+
+    <script src='vendor/phaser.js'></script>
+  </head>
+  <body>
+    <h1>8. Animation</h1>
+
+    <div id='game'></div>
+
+    <script>
+      !function(){
+        'use strict';
+        var GamePlay = function(){
+        };
+
+        GamePlay.prototype = {
+
+          preload : function(){
+            this.game.load.spritesheet('player', 'assets/fancy/player.png', 42, 49, 16);
+            this.game.load.spritesheet('floor', 'assets/simple/floor.png', 500, 20);
+            this.game.load.spritesheet('obstacle', 'assets/simple/obstacle.png', 100, 100);
+          },
+
+          create : function(){
+            this.game.stage.backgroundColor = '#ff0';
+
+            // Set up physics
+            this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            this.game.physics.arcade.gravity.y = 500;
+
+            // Floor
+            this.floor = this.game.add.sprite(0, this.game.world.height, 'floor');
+            this.floor.anchor.setTo(0,1);
+            this.game.physics.enable( [ this.floor ], Phaser.Physics.ARCADE);
+            this.floor.body.allowGravity = false;            
+            this.floor.body.immovable = true;            
+
+            // Player
+            this.player = this.game.add.sprite(50, 0, 'player');
+            this.game.physics.enable( [ this.player ], Phaser.Physics.ARCADE);
+            this.player.body.collideWorldBounds = true;   
+
+            // this.player.animations.add("walk", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], 30, true);
+            // this.player.animations.add("jump", [15], 1, true);
+            // this.player.animations.play("walk")
+
+            // Obstacles!
+            this.obstacles = this.game.add.group();
+            this.obstacles.createMultiple(20, 'obstacle');
+            this.game.physics.enable( [ this.obstacles ], Phaser.Physics.ARCADE);
+            this.obstacles.setAll('body.allowGravity', false);
+            this.obstacles.setAll('body.immovable', true);
+            this.obstacles.setAll('body.collideWorldBounds', false);
+            this.obstacles.setAll('outOfBoundsKill', true);
+            this.obstacles.setAll('checkWorldBounds', true);
+
+            // Score
+            this.score = 0;            
+            this.updateScore(0);
+
+            // Timer!
+            this.obstacleTimer = this.game.time.create(false);
+            this.startObstacles();
+
+            // Keyboard
+            var space_key = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+            space_key.onDown.add(this.jump, this);    
+          },
+
+          update : function(){
+            this.game.physics.arcade.collide(this.player, this.floor, null, null, this);
+
+            this.game.physics.arcade.collide(this.player, this.obstacles, this.collideWithObstacle, null, this);
+          },
+
+          // My custom functions
+
+          updateScore : function(add){
+            if(!this.scoreText){
+              this.scoreText = this.game.add.text(10, 10, "bla", { font: "16px Arial", fill: "#000", align: "left" });
+              this.scoreText.anchor.setTo(0,0);                
+            }
+            if(add){
+              this.score += add;
+            }
+
+            this.scoreText.text = "Score: " + this.score;
+          },
+
+          startObstacles : function(){
+            this.addObstacle();
+            this.obstacleTimer.add(Phaser.Timer.SECOND * 1.5, this.startObstacles, this);
+            this.obstacleTimer.start();            
+          },
+
+          addObstacle : function(){
+            if(this.player.alive){
+              this.updateScore(1);
+            }
+
+            var obstacle = this.obstacles.getFirstDead();
+
+            if(!obstacle){
+              return;
+            }
+
+            obstacle.anchor.setTo(1, 1);
+            obstacle.reset(this.game.world.width, this.game.world.height - this.floor.body.height);
+
+            var w = Math.round((60 - 10) * Math.random() + 10);
+            var h = Math.round((50 - 10) * Math.random() + 10);
+
+            obstacle.crop({x: 0, y: 0, width: w, height: h});
+            obstacle.body.width = w;
+            obstacle.body.height = h;
+
+            obstacle.body.velocity.x = -200;
+          },
+
+          collideWithObstacle : function(){
+            this.player.kill();
+          },
+
+          // collideWithFloor : function(){
+          //   this.player.animations.play('walk');
+          // },
+
+          jump : function(){
+            if(this.player.body.touching.down === true){
+              // this.player.animations.play('jump')
+              this.player.body.velocity.y = -250;  
+            }
+          }
+        };
+
+
+        var instance = new Phaser.Game(500, 500, Phaser.AUTO, 'game');
+        instance.state.add('Play', GamePlay);
+        instance.state.start('Play');
+
+      }();
+    </script>
+
+  </body>
+</html>

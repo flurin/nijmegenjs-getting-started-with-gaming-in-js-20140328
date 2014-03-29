@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Jump! - Demo 2</title>
+
+    <script src="vendor/phaser.js"></script>
+  </head>
+  <body>
+    <h1>2. A bit more structure &amp; the first sprite</h1>
+
+    <div id="game"></div>
+
+    <script>
+     !function(){
+       'use strict';
+       var GamePlay = function(){
+
+       };
+
+       GamePlay.prototype = {
+
+         preload : function(){
+          // this.game.load.spritesheet('player', 'assets/simple/player.png', 35, 35);
+         },
+
+         create : function(){
+           this.game.stage.backgroundColor = '#ff0';
+
+           // this.game.add.sprite(0, 0, 'player');
+         },
+
+         update : function(){
+         },
+
+         render : function(){
+         }
+       }
+
+
+       var instance = new Phaser.Game(500, 500, Phaser.AUTO, 'game');
+       instance.state.add('Play', GamePlay);
+       instance.state.start('Play');
+
+      }();      
+    </script>
+
+  </body>
+</html>
