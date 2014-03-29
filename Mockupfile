@@ -18,6 +18,6 @@ mockup.release do |r|
   r.cleanup "**/.sass-cache"
   r.cleanup "**/stylesheets/src"  
   
-  # r.finalize GitBranch, :branch => "gh-pages", :remote => "git@github.com:flurin/thalia-lunchlezing-20140226.git"
+  r.finalize GitBranch, :branch => "gh-pages", :remote => "git@github.com:flurin/nijmegenjs-getting-started-with-gaming-in-js-20140328.git"
 end
 
