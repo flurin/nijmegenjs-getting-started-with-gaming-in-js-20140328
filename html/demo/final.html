@@ -84,7 +84,7 @@
             this.player.animations.play("walk")
 
             // Score
-            this.score = 0;            
+            this.game.score = 0;            
             this.updateScore(0);
 
 
@@ -172,10 +172,10 @@
               this.scoreText.anchor.setTo(0,0);                
             }
             if(add){
-              this.score += add;
+              this.game.score += add;
             }
 
-            this.scoreText.text = "Score: " + this.score;
+            this.scoreText.text = "Score: " + this.game.score;
           },
 
           addObstacle : function(){
@@ -207,9 +207,10 @@
             this.bloodParticles.y = this.player.body.y + this.player.body.halfHeight;
             this.bloodParticles.start(true, 1000, null, 50);
 
-            var killTween = this.game.add.tween(this.player).to({ alpha: 0 }, 300, Phaser.Easing.Bounce.InOut, true);
+            var killTween = this.game.add.tween(this.player).to({ alpha: 0 }, 500, Phaser.Easing.Bounce.InOut, true);
             killTween.onComplete.add(function(){
               this.player.kill();
+              this.gameOver();
             }, this);
           },
 
